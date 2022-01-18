@@ -19,14 +19,6 @@ class _AbaConversasState extends State<AbaConversas> {
   void initState() {
     // TODO: implement initState
     super.initState();
-    conversas.add(Conversa(
-        profile_picture: "https://static.photocdn.pt/images/articles/2019/08/07/images/articles/2019/07/31/linkedin_profile_picture_examples.png",
-        name: "Apollo",
-        messages: [Message(content: "https://pixy.org/src2/600/6007103.jpg", date: DateTime.fromMillisecondsSinceEpoch(1642456819).toString())]));
-    conversas.add(Conversa(
-        profile_picture: "http://getwallpapers.com/wallpaper/full/3/e/b/563644.jpg",
-        name: "Fernanda",
-        messages: [Message(content: "Oieee", date: DateTime.now().toString())]));
   }
 
   @override

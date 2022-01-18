@@ -92,10 +92,10 @@ class _CadastroState extends State<Cadastro> {
                     Padding(
                       padding: EdgeInsets.only(top: 32, bottom: 16),
                       child: ElevatedButton(
-                        onPressed: () {
+                        onPressed: () async {
                           bool canRegister = validarCampos();
                           if (canRegister) {
-                            mAuth.createUserWithEmailAndPassword(
+                            await mAuth.createUserWithEmailAndPassword(
                                 email: _emailController.text,
                                 password: _passwordController.text
                             ).whenComplete(() {
