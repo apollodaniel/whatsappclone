@@ -28,7 +28,7 @@ class _LoginState extends State<Login> {
 
     if(mAuth.currentUser != null){
       WidgetsBinding.instance?.addPostFrameCallback((_) {
-        Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => Home()));
+        Navigator.pushReplacementNamed(context, "/home");
       });
     }
   }
@@ -53,6 +53,7 @@ class _LoginState extends State<Login> {
                 padding: EdgeInsets.only(bottom: 8, top: 32),
                 child: TextField(
                     controller: _emailController,
+                    keyboardType: TextInputType.emailAddress,
                     decoration: InputDecoration(
                         hintText: "Email",
                         contentPadding: EdgeInsets.fromLTRB(32, 16, 32, 16),
@@ -62,6 +63,7 @@ class _LoginState extends State<Login> {
               ),
               TextField(
                   controller: _passwordController,
+                  obscureText: true,
                   decoration: InputDecoration(
                       hintText: "Senha",
                       contentPadding: EdgeInsets.fromLTRB(32, 16, 32, 16),
@@ -88,10 +90,14 @@ class _LoginState extends State<Login> {
                     "Não cadastrado ainda? Clique aqui",
                     style: TextStyle(color: Colors.white, fontSize: 16),
                   ),
-                  onTap: (){
-                    Navigator.push(context, MaterialPageRoute(
-                        builder: (context) => Cadastro()
-                    ));
+                  onTap: () async{
+                    var result = await Navigator.pushNamed(context, "/cadastro");
+
+                    if(result != null){
+                      Map result_map = result as Map;
+                      _emailController.text = result_map["email"];
+                      _passwordController.text= result_map["senha"];
+                    }
                   },
                 ),
               )
@@ -103,7 +109,7 @@ class _LoginState extends State<Login> {
     );
   }
 
-  login(){
+  login()async{
     print("login");
     String email = _emailController.text;
     String password = _passwordController.text;
@@ -113,13 +119,15 @@ class _LoginState extends State<Login> {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Email ou senha não podem estar vázios!")));
     }else{
       bool sucess = true;
-      mAuth.signInWithEmailAndPassword(email: email, password: password).catchError((error){
+      await mAuth.signInWithEmailAndPassword(email: email, password: password).catchError((error){
         sucess = false;
         ScaffoldMessenger.of(context).removeCurrentSnackBar();
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(error.toString())));
       });
       if(sucess){
-        Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => Home()));
+        Navigator.pushReplacementNamed(context, "/home");
+        ScaffoldMessenger.of(context).removeCurrentSnackBar();
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Sucesso ao logar")));
       }
     }
   }

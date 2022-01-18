@@ -66,6 +66,7 @@ class _CadastroState extends State<Cadastro> {
                       padding: EdgeInsets.only(bottom: 8),
                       child: TextField(
                           controller: _emailController,
+                          keyboardType: TextInputType.emailAddress,
                           decoration: InputDecoration(
                               hintText: "Email",
                               errorText: email_error,
@@ -77,6 +78,7 @@ class _CadastroState extends State<Cadastro> {
                     ),
                     TextField(
                         controller: _passwordController,
+                        obscureText: true,
                         decoration: InputDecoration(
                             errorText: password_error,
                             hintText: "Senha",
@@ -103,7 +105,8 @@ class _CadastroState extends State<Cadastro> {
                                 {
                                   "nome": _nomeController.text,
                                   "email": _emailController.text,
-                                  "password": _passwordController.text
+                                  "password": _passwordController.text,
+                                  "profile_picture":"gs://whatsapp-30d59.appspot.com/blank-profile-picture-973460.png"
                                 }
                               );
                                       ScaffoldMessenger.of(context).removeCurrentSnackBar();
@@ -111,9 +114,11 @@ class _CadastroState extends State<Cadastro> {
                                       ScaffoldMessenger.of(context).showSnackBar(
                                   SnackBar(content: Text("Registrado com sucesso!"))
                               );
-                              _nomeController.clear();
-                              _emailController.clear();
-                              _passwordController.clear();
+                              Map<String, dynamic> result = {
+                                "email":_emailController.text,
+                                "senha":_passwordController.text
+                              };
+                              Navigator.pop(context, result);
                             });
                           }
                         },
