@@ -36,11 +36,12 @@ class _LoginState extends State<Login> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Center(
-        child: SingleChildScrollView(
-        child:Padding(
-        padding: EdgeInsets.all(32),
-    child: Column(
+      body: SingleChildScrollView(
+      child: Center(
+        child: Container(
+          height: MediaQuery.of(context).size.height,
+          padding: EdgeInsets.all(32),
+          child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -104,7 +105,7 @@ class _LoginState extends State<Login> {
             ],
           ),
         ) ,
-        ),
+      ),
       )
     );
   }

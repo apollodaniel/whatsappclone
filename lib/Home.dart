@@ -33,7 +33,7 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
 
     if(item == actions[0]){
       //configuracoes
-
+      Navigator.pushNamed(context, "/config");
     }else if(item == actions[1]){
       //logout
       _deslogarUsuario();

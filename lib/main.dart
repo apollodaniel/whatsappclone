@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:whatsapp/Cadastro.dart';
+import 'package:whatsapp/Configuracoes.dart';
 import 'package:whatsapp/Login.dart';
 
 import 'Home.dart';
@@ -16,6 +17,7 @@ void main() async {
       "/login": (context) => Login(),
       "/cadastro": (context) => Cadastro(),
       "/home": (context) => Home(),
+      "/config": (context) => Configuracoes()
     },
     theme: ThemeData.dark().copyWith(
       colorScheme: ColorScheme.fromSwatch().copyWith(

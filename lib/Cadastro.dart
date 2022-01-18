@@ -22,6 +22,10 @@ class _CadastroState extends State<Cadastro> {
   late FirebaseAuth mAuth;
   late FirebaseFirestore firestore;
 
+  AppBar appBar = AppBar(
+    title: Text("Cadastro"),
+  );
+
   @override
   void initState() {
     // TODO: implement initState
@@ -33,12 +37,11 @@ class _CadastroState extends State<Cadastro> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(
-          title: Text("Cadastro"),
-        ),
+        appBar: appBar,
         body: Center(
           child: SingleChildScrollView(
-            child: Padding(
+            child: Container(
+                height: MediaQuery.of(context).size.height - appBar.preferredSize.height - MediaQuery.of(context).padding.top,
                 padding: EdgeInsets.all(32),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -57,7 +60,7 @@ class _CadastroState extends State<Cadastro> {
                               hintText: "Nome",
                               errorText: nome_error,
                               contentPadding:
-                                  EdgeInsets.fromLTRB(32, 16, 32, 16),
+                              EdgeInsets.fromLTRB(32, 16, 32, 16),
                               filled: true,
                               border: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(32)))),
@@ -71,7 +74,7 @@ class _CadastroState extends State<Cadastro> {
                               hintText: "Email",
                               errorText: email_error,
                               contentPadding:
-                                  EdgeInsets.fromLTRB(32, 16, 32, 16),
+                              EdgeInsets.fromLTRB(32, 16, 32, 16),
                               filled: true,
                               border: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(32)))),
@@ -93,24 +96,24 @@ class _CadastroState extends State<Cadastro> {
                           bool canRegister = validarCampos();
                           if (canRegister) {
                             mAuth.createUserWithEmailAndPassword(
-                                    email: _emailController.text,
-                                    password: _passwordController.text
+                                email: _emailController.text,
+                                password: _passwordController.text
                             ).whenComplete(() {
-                                      mAuth.currentUser
-                                          ?.updateDisplayName(_nomeController.text);
-                                      firestore
-                                          .collection("users")
-                                          .doc(mAuth.currentUser?.uid)
-                                          .set(
-                                {
-                                  "nome": _nomeController.text,
-                                  "email": _emailController.text,
-                                  "profile_picture":"https://firebasestorage.googleapis.com/v0/b/whatsapp-30d59.appspot.com/o/blank-profile-picture-973460.png?alt=media&token=2f58af8f-18e2-49d2-b573-240a4f2ca132"
-                                }
+                              mAuth.currentUser
+                                  ?.updateDisplayName(_nomeController.text);
+                              firestore
+                                  .collection("users")
+                                  .doc(mAuth.currentUser?.uid)
+                                  .set(
+                                  {
+                                    "nome": _nomeController.text,
+                                    "email": _emailController.text,
+                                    "profile_picture":"https://firebasestorage.googleapis.com/v0/b/whatsapp-30d59.appspot.com/o/blank-profile-picture-973460.png?alt=media&token=2f58af8f-18e2-49d2-b573-240a4f2ca132"
+                                  }
                               );
-                                      ScaffoldMessenger.of(context).removeCurrentSnackBar();
+                              ScaffoldMessenger.of(context).removeCurrentSnackBar();
 
-                                      ScaffoldMessenger.of(context).showSnackBar(
+                              ScaffoldMessenger.of(context).showSnackBar(
                                   SnackBar(content: Text("Registrado com sucesso!"))
                               );
                               Map<String, dynamic> result = {
@@ -131,10 +134,13 @@ class _CadastroState extends State<Cadastro> {
                             padding: EdgeInsets.fromLTRB(32, 16, 32, 16)),
                       ),
                     ),
+
                   ],
-                )),
+                ),
+             )
           ),
-        ));
+        ),
+      );
   }
 
   validarCampos() {
