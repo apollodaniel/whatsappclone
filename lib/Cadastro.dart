@@ -105,8 +105,7 @@ class _CadastroState extends State<Cadastro> {
                                 {
                                   "nome": _nomeController.text,
                                   "email": _emailController.text,
-                                  "password": _passwordController.text,
-                                  "profile_picture":"gs://whatsapp-30d59.appspot.com/blank-profile-picture-973460.png"
+                                  "profile_picture":"https://firebasestorage.googleapis.com/v0/b/whatsapp-30d59.appspot.com/o/blank-profile-picture-973460.png?alt=media&token=2f58af8f-18e2-49d2-b573-240a4f2ca132"
                                 }
                               );
                                       ScaffoldMessenger.of(context).removeCurrentSnackBar();

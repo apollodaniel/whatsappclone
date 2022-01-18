@@ -10,11 +10,6 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
 
-  FirebaseFirestore.instance
-      .collection("users")
-      .doc("001")
-      .set({"nome": "apollo"});
-
   runApp(MaterialApp(
     initialRoute: "/login",
     routes: {
