@@ -88,52 +88,58 @@ class _AbaConversasState extends State<AbaConversas> {
     return ListView.builder(
       itemCount: conversas.length,
       itemBuilder: (context, index) {
-        String date = conversas[index].messages.last.date;
-        DateTime date_parsed = DateTime.parse(date);
-        String formated_date = "";
 
-        String message_content_raw = conversas[index].messages.last.content;
-        String message_content =  isImage(message_content_raw) ? "Sent a image" : message_content_raw;
-        String profile_picture = conversas[index].profile_picture;
-        String name = conversas[index].name;
-        message_content = mAuth.currentUser!.uid == conversas[index].messages.last.sender ? "Você: $message_content" : "$name: $message_content";
+        try{
+          String date = conversas[index].messages.last.date;
+          DateTime date_parsed = DateTime.parse(date);
+          String formated_date = "";
 
-        if(date_parsed.difference(DateTime.now()).inDays != 0 && date_parsed.isBefore(DateTime.now())){
-          formated_date =  DateFormat("dd/MM/yyyy").format(date_parsed);
-        }else{
-          formated_date = DateFormat("HH:mm").format(date_parsed);
-        }
+          String message_content_raw = conversas[index].messages.last.content;
+          String message_content =  isImage(message_content_raw) ? "Sent a image" : message_content_raw;
+          String profile_picture = conversas[index].profile_picture;
+          String name = conversas[index].name;
+          message_content = mAuth.currentUser!.uid == conversas[index].messages.last.sender ? "Você: $message_content" : "$name: $message_content";
+
+          if(date_parsed.difference(DateTime.now()).inDays != 0 && date_parsed.isBefore(DateTime.now())){
+            formated_date =  DateFormat("dd/MM/yyyy").format(date_parsed);
+          }else{
+            formated_date = DateFormat("HH:mm").format(date_parsed);
+          }
 
 
 
 
-        return GestureDetector(
-          child: Card(
-            child: ListTile(
-              leading: GestureDetector(
-                child: CircleAvatar(
-                  backgroundImage: NetworkImage(conversas[index].profile_picture),
+          return GestureDetector(
+            child: Card(
+              child: ListTile(
+                leading: GestureDetector(
+                  child: CircleAvatar(
+                    backgroundImage: NetworkImage(conversas[index].profile_picture),
+                  ),
+                  onTap: (){
+                    showDialog(context: context, builder: (context) {
+                      return AlertDialog(
+                        title: Text(name),
+                        content: Image.network(profile_picture,height: 180, width: 180, fit: BoxFit.cover,),
+
+                      );
+                    },);
+                  },
                 ),
-                onTap: (){
-                  showDialog(context: context, builder: (context) {
-                    return AlertDialog(
-                      title: Text(name),
-                      content: Image.network(profile_picture,height: 180, width: 180, fit: BoxFit.cover,),
-
-                    );
-                  },);
-                },
-              ),
-              title: Text(conversas[index].name),
-              subtitle: Text(
-                "${formated_date} - ${message_content}",
+                title: Text(conversas[index].name),
+                subtitle: Text(
+                  "${formated_date} - ${message_content}",
+                ),
               ),
             ),
-          ),
-          onTap: (){
-            Navigator.push(context, MaterialPageRoute(builder: (context) =>  Mensagens(pessoa: Pessoa(nome: conversas[index].name, email: conversas[index].email, profile_picture: conversas[index].profile_picture, id: conversas[index].id)),));
-          },
-        );
+            onTap: (){
+              Navigator.push(context, MaterialPageRoute(builder: (context) =>  Mensagens(pessoa: Pessoa(nome: conversas[index].name, email: conversas[index].email, profile_picture: conversas[index].profile_picture, id: conversas[index].id)),));
+            },
+          );
+        }catch(_){
+          return Container();
+        }
+
       },
     );
   }
