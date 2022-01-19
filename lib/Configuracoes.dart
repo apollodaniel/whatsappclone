@@ -18,7 +18,7 @@ class _ConfiguracoesState extends State<Configuracoes> {
   File? image;
 
   Pessoa pessoa =
-      Pessoa(nome: "Guest", email: "johndoe@gmail.com", profile_picture: "");
+      Pessoa(nome: "Guest", email: "johndoe@gmail.com", profile_picture: "", id: "");
 
   TextEditingController _nomeController = TextEditingController();
 
@@ -47,7 +47,9 @@ class _ConfiguracoesState extends State<Configuracoes> {
             pessoa = Pessoa(
                 nome: doc.get("nome"),
                 email: doc.get("email"),
-                profile_picture: doc.get("profile_picture"));
+                profile_picture: doc.get("profile_picture"),
+                id: doc.id
+            );
             _nomeController.text = pessoa.nome;
           });
         }

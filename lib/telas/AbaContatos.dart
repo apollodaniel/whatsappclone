@@ -41,7 +41,9 @@ class _AbaContatosState extends State<AbaContatos> {
         Pessoa pessoa = Pessoa(
             nome: nome,
             email: doc.get("email"),
-            profile_picture: doc.get("profile_picture"));
+            profile_picture: doc.get("profile_picture"),
+            id: doc.id
+        );
         pessoas_local.add(pessoa);
       }
       setState(() {
