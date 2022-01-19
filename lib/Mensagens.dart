@@ -60,11 +60,13 @@ class _MensagensState extends State<Mensagens> {
           });
         }
     }});
+
   }
 
 
   @override
   Widget build(BuildContext context) {
+    messages.sort((a, b) => DateTime.parse(a.date).compareTo(DateTime.parse(b.date)));
 
     return Scaffold(
         appBar: AppBar(
