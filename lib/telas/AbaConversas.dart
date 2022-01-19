@@ -158,6 +158,9 @@ class _AbaConversasState extends State<AbaConversas> {
 
   @override
   Widget build(BuildContext context) {
+    conversas.sort((a, b) => DateTime.parse(b.messages.last.date).compareTo(DateTime.parse(a.messages.last.date)));
+
+
     return ListView.builder(
       itemCount: conversas.length,
       itemBuilder: (context, index) {

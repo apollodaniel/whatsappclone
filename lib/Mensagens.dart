@@ -208,18 +208,29 @@ class _MensagensState extends State<Mensagens> {
 
         dynamic data = snapshot.data();
 
-        if(!data.containsKey("messages")){
+        if(data == null){
+          data = <String,dynamic>{};
+          data["users"] = [
+            widget.pessoa.id,
+            mAuth.currentUser!.uid,
+          ];
           data["messages"] = [message.toMap()];
+          snapshot.reference.set(data);
         }else{
-          data["messages"].add(message.toMap());
-        }
+          if(!data.containsKey("messages")){
+            data["messages"] = [message.toMap()];
+          }else{
+            data["messages"].add(message.toMap());
+          }
 
-        data["users"]=[
-          widget.pessoa.id,
-          mAuth.currentUser!.uid
-        ];
-        snapshot.reference.update(data);
+          data["users"]=[
+            widget.pessoa.id,
+            mAuth.currentUser!.uid
+          ];
+          snapshot.reference.update(data);
+        }
         _mensagensController.clear();
+
       }
   }
 }
