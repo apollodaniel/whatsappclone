@@ -33,7 +33,7 @@ class _AbaContatosState extends State<AbaContatos> {
         String uid = doc.id;
         String nome = "";
         if (uid == mAuth.currentUser!.uid) {
-          nome = "${doc.get("nome")}   ( você )";
+          nome = "${doc.get("nome")} ( você )";
         } else {
           nome = doc.get("nome");
         }
@@ -62,7 +62,7 @@ class _AbaContatosState extends State<AbaContatos> {
             padding: EdgeInsets.all(4),
             child: GestureDetector(
               onTap: (){
-                if(pessoas[index].email != mAuth.currentUser!.email){
+                if(pessoas[index].id != mAuth.currentUser!.uid){
                   Navigator.push(context, MaterialPageRoute(builder: (context) =>  Mensagens(pessoa: pessoas[index]),));
                 }
               },
