@@ -35,37 +35,14 @@ class _AbaConversasState extends State<AbaConversas> {
     firestore = FirebaseFirestore.instance;
     storage = FirebaseStorage.instance;
 
-    _getMensagens();
-  }
 
-  getConversas() async {
-    QuerySnapshot snapshot_users = await firestore.collection("users").get();
-
-    firestore
-        .collection("mensagens")
-        .snapshots()
-        .listen((mensagens_snapshot) async {
-      for (DocumentSnapshot document in mensagens_snapshot.docs) {
-        if (document.id.split("||").contains(mAuth.currentUser!.uid)) {
-          _recuperarConversas(document,snapshot_users);
-          firestore
-              .collection("mensagens")
-              .doc(document.id)
-              .collection("mensagens")
-              .snapshots()
-              .listen((event) async {
-              conversas.clear();
-          });
-        }
-      }
-
-
+    firestore.collection("mensagens").snapshots().listen((event) {
+      _getMensagens();
     });
+
   }
 
-
-
-  _getMensagens()async{
+  _getMensagens() async {
 
     QuerySnapshot snapshot = await firestore.collection("mensagens").get();
 
@@ -113,48 +90,9 @@ class _AbaConversasState extends State<AbaConversas> {
       conversas = conversasLocal;
     });
 
-
   }
 
-  _recuperarConversas(DocumentSnapshot document_, QuerySnapshot snapshot_users) async{
-    firestore
-        .collection("mensagens")
-        .doc(document_.id)
-        .collection("mensagens")
-        .snapshots()
-        .listen((event) async {
-      List<Message> mensagens = event.docs.map((event) {
-        return Message(
-            content: event.get("content"),
-            date: event.get("date"),
-            sender: event.get("sender"));
-      }).toList();
 
-
-      List users = [];
-      DocumentSnapshot documentSnapshot = await firestore
-          .collection("mensagens")
-          .doc(document_.id)
-          .get();
-      users = documentSnapshot.get("users");
-
-      users.remove(mAuth.currentUser!.uid);
-
-      for(DocumentSnapshot doc_user in snapshot_users.docs){
-        if(doc_user.id == users.first){
-          Conversa conversa = Conversa(
-              email: doc_user.get("email"),
-              id: doc_user.id,
-              profile_picture: doc_user.get("profile_picture"),
-              name: doc_user.get("nome"),
-              messages: mensagens);
-          setState(() {
-            conversas.add(conversa);
-          });
-        }
-      }
-    });
-  }
 
   @override
   Widget build(BuildContext context) {
