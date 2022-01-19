@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:whatsapp/model/Message.dart';
 
@@ -45,20 +46,20 @@ class _MensagensState extends State<Mensagens> {
       for(DocumentSnapshot doc in querySnapshot.docs) {
         if (doc.get("users").contains(mAuth.currentUser!.uid) &&
             doc.get("users").contains(widget.pessoa.id)) {
-          doc.reference.collection("mensagens").snapshots().listen((event) {
+          dynamic data = doc.data();
 
-            List<Message> mensagens = event.docs.map(
-                    (event) {
-                  return Message(content: event.get("content"),
-                      date: event.get("date"),
-                      sender: event.get("sender"));
-                }
-            ).toList();
-            id_chat = doc.id;
-            setState(() {
-              messages.clear();
-              messages.addAll(mensagens);
-            });
+
+          List<Message> messages_local = [];
+
+          for(var value in data["messages"]){
+
+            Message message_temp = Message(content: value["content"], date: value["date"], sender: value["sender"]);
+            messages_local.add(message_temp);
+
+          }
+
+          setState(() {
+            messages = messages_local;
           });
 
         }
@@ -201,19 +202,23 @@ class _MensagensState extends State<Mensagens> {
         Message message = Message(content: mensagem,
             date: DateTime.now().toString(),
             sender: mAuth.currentUser!.uid);
-        await firestore
-            .collection("mensagens")
-            .doc(_chatId).set({
-          "users": [
-            widget.pessoa.id,
-            mAuth.currentUser!.uid
-          ],
-        }).whenComplete(() {
-          firestore
-              .collection("mensagens")
-              .doc(_chatId).collection("mensagens").add(message.toMap());
 
-        });
+        DocumentSnapshot snapshot = await firestore.collection("mensagens").doc(_chatId).get();
+
+
+        dynamic data = snapshot.data();
+
+        if(!data.containsKey("messages")){
+          data["messages"] = [message.toMap()];
+        }else{
+          data["messages"].add(message.toMap());
+        }
+
+        data["users"]=[
+          widget.pessoa.id,
+          mAuth.currentUser!.uid
+        ];
+        snapshot.reference.update(data);
         _mensagensController.clear();
       }
   }
