@@ -47,7 +47,7 @@ class _MensagensState extends State<Mensagens> {
 
 
     StreamBuilder streamBuilder = StreamBuilder(
-      stream: firestore.collection("mensagens").doc(mAuth.currentUser!.uid).collection(widget.pessoa.id).snapshots(),
+      stream: firestore.collection("mensagens").snapshots(),
       builder: (context, snapshot) {
         switch(snapshot.connectionState){
           case ConnectionState.none:
@@ -70,10 +70,13 @@ class _MensagensState extends State<Mensagens> {
             }else{
               QuerySnapshot querySnapshot = snapshot.data;
 
-              List<Message> messages = querySnapshot.docs.map(
+              for(DocumentSnapshot doc in querySnapshot.docs){
+                print(doc.id.toString());
+              }
+              List<Message> messages = []; /*querySnapshot.docs.map(
                       (e) {
                         return Message(content: e.get("content"), date: e.get("date"), sender: e.get("sender"));
-              }).toList();
+              }).toList();*/
 
               return Expanded(
                   child: ListView.builder(
@@ -196,9 +199,15 @@ class _MensagensState extends State<Mensagens> {
       Message message = Message(content: mensagem, date: DateTime.now().toString(), sender: mAuth.currentUser!.uid);
       await firestore
           .collection("mensagens")
-          .doc(user.uid)
-          .collection(widget.pessoa.id)
-          .add(message.toMap());
+          .add({
+        "users":[
+          widget.pessoa.id,
+          mAuth.currentUser!.uid
+        ],
+      }).then(
+              (value) => {
+                value.collection("mensagens").add(message.toMap())
+              });
       _mensagensController.clear();
     }
   }
