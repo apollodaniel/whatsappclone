@@ -40,24 +40,27 @@ class _MensagensState extends State<Mensagens> {
   getMessage() async{
     firestore
         .collection("mensagens")
-        .snapshots().listen((querySnapshot)async {
+        .snapshots().listen((querySnapshot) {
 
       for(DocumentSnapshot doc in querySnapshot.docs) {
         if (doc.get("users").contains(mAuth.currentUser!.uid) &&
             doc.get("users").contains(widget.pessoa.id)) {
-          QuerySnapshot event = await doc.reference.collection("mensagens").get();
-          List<Message> mensagens = event.docs.map(
-                  (event) {
-                return Message(content: event.get("content"),
-                    date: event.get("date"),
-                    sender: event.get("sender"));
-              }
-          ).toList();
-          id_chat = doc.id;
-          setState(() {
-            messages.clear();
-            messages.addAll(mensagens);
+          doc.reference.collection("mensagens").snapshots().listen((event) {
+
+            List<Message> mensagens = event.docs.map(
+                    (event) {
+                  return Message(content: event.get("content"),
+                      date: event.get("date"),
+                      sender: event.get("sender"));
+                }
+            ).toList();
+            id_chat = doc.id;
+            setState(() {
+              messages.clear();
+              messages.addAll(mensagens);
+            });
           });
+
         }
     }});
 
@@ -212,7 +215,6 @@ class _MensagensState extends State<Mensagens> {
 
         });
         _mensagensController.clear();
-        getMessage();
       }
   }
 }
