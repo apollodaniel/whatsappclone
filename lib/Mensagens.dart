@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:whatsapp/Helper.dart';
 import 'package:whatsapp/model/Message.dart';
 
 import 'model/Pessoa.dart';
@@ -38,40 +39,36 @@ class _MensagensState extends State<Mensagens> {
     getMessage();
   }
 
-  getMessage() async{
-    firestore
-        .collection("mensagens")
-        .snapshots().listen((querySnapshot) {
-
-      for(DocumentSnapshot doc in querySnapshot.docs) {
+  getMessage() async {
+    firestore.collection("mensagens").snapshots().listen((querySnapshot) {
+      for (DocumentSnapshot doc in querySnapshot.docs) {
         if (doc.get("users").contains(mAuth.currentUser!.uid) &&
             doc.get("users").contains(widget.pessoa.id)) {
-
           dynamic data = doc.data();
 
           id_chat = doc.id;
           List<Message> messages_local = [];
 
-          for(var value in data["messages"]){
-
-            Message message_temp = Message(content: value["content"], date: value["date"], sender: value["sender"]);
+          for (var value in data["messages"]) {
+            Message message_temp = Message(
+                content: value["content"],
+                date: value["date"],
+                sender: value["sender"]);
             messages_local.add(message_temp);
-
           }
 
           setState(() {
             messages = messages_local;
           });
-
         }
-    }});
-
+      }
+    });
   }
-
 
   @override
   Widget build(BuildContext context) {
-    messages.sort((a, b) => DateTime.parse(a.date).compareTo(DateTime.parse(b.date)));
+    messages.sort(
+        (a, b) => DateTime.parse(a.date).compareTo(DateTime.parse(b.date)));
 
     return Scaffold(
         appBar: AppBar(
@@ -88,10 +85,7 @@ class _MensagensState extends State<Mensagens> {
           ),
         ),
         body: Container(
-            width: MediaQuery
-                .of(context)
-                .size
-                .width,
+            width: MediaQuery.of(context).size.width,
             decoration: BoxDecoration(
                 image: DecorationImage(
                     image: AssetImage("images/bg.jpg"),
@@ -103,45 +97,50 @@ class _MensagensState extends State<Mensagens> {
                   child: Column(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                  Expanded(
-                  child: ListView.builder(
-                  physics: BouncingScrollPhysics(),
-                itemCount: messages.length,
-                itemBuilder: (context, index) {
-                  Alignment alignment = Alignment.centerRight;
-                  Color cor = Colors.green;
-                  double larguraContainer = MediaQuery
-                      .of(context)
-                      .size
-                      .width * 80 / 100;
+                        Expanded(
+                            child: ListView.builder(
+                              physics: BouncingScrollPhysics(),
+                              itemCount: messages.length,
+                              itemBuilder: (context, index) {
+                              Alignment alignment = Alignment.centerRight;
+                              Color cor = Colors.green;
+                              double larguraContainer =
+                                  MediaQuery.of(context).size.width * 80 / 100;
 
-                  if (messages[index].sender == widget.pessoa.id) {
-                    alignment = Alignment.centerLeft;
-                    cor = ThemeData
-                        .dark()
-                        .primaryColor;
-                  }
+                              if (messages[index].sender == widget.pessoa.id) {
+                                alignment = Alignment.centerLeft;
+                                cor = ThemeData.dark().primaryColor;
+                              }
 
+                              Widget message = Text(messages[index].content);
 
-                  return Align(
-                    alignment: alignment,
-                    child: Padding(
-                      padding: EdgeInsets.all(6),
-                      child: Container(
-                        width: larguraContainer,
-                        decoration: BoxDecoration(
-                            color: cor,
-                            borderRadius: BorderRadius.all(
-                                Radius.circular(8))
-                        ),
-                        padding: EdgeInsets.all(16),
-                        child: Text(messages[index].content),
-                      ),
-                    ),
-                  );
-                },
-              )
-            ),
+                              String content = messages[index].content;
+                              if(Helper.isValidLink(content) && Helper.isImage(content.split("/").last)){
+                                message = Column(
+                                  children: [
+                                    Image.network(content),
+                                    Text(content.split("/").last)
+                                  ],
+                                );
+                              }
+
+                              return Align(
+                                alignment: alignment,
+                                child: Padding(
+                                  padding: EdgeInsets.all(6),
+                                  child: Container(
+                                    width: larguraContainer,
+                                    decoration: BoxDecoration(
+                                        color: cor,
+                                        borderRadius:
+                                            BorderRadius.all(Radius.circular(8))),
+                                    padding: EdgeInsets.all(16),
+                                    child: message,
+                                  ),
+                                ),
+                              );
+                          },
+                        )),
                         Padding(
                           padding: EdgeInsets.all(8),
                           child: Row(
@@ -156,15 +155,14 @@ class _MensagensState extends State<Mensagens> {
                                     style: TextStyle(fontSize: 20),
                                     decoration: InputDecoration(
                                         filled: true,
-                                        fillColor: ThemeData
-                                            .dark()
-                                            .primaryColor,
-                                        contentPadding: EdgeInsets.fromLTRB(
-                                            32, 8, 32, 8),
+                                        fillColor:
+                                            ThemeData.dark().primaryColor,
+                                        contentPadding:
+                                            EdgeInsets.fromLTRB(32, 8, 32, 8),
                                         hintText: "Digite uma mensagem...",
                                         border: OutlineInputBorder(
                                             borderRadius:
-                                            BorderRadius.circular(32)),
+                                                BorderRadius.circular(32)),
                                         prefixIcon: IconButton(
                                             icon: Icon(Icons.camera_alt),
                                             onPressed: () {})),
@@ -183,55 +181,49 @@ class _MensagensState extends State<Mensagens> {
                             ],
                           ),
                         ),
-                      ])
-              ),
-            )
-        )
-    );
+                      ])),
+            )));
   }
 
-    _salvarMensagem() async {
-      String mensagem = _mensagensController.text;
+  _salvarMensagem() async {
+    String mensagem = _mensagensController.text;
 
-      String _chatId = id_chat;
+    String _chatId = id_chat;
 
-      if(id_chat.isEmpty){
-        _chatId = widget.pessoa.id + "||" + mAuth.currentUser!.uid;
-      }
+    if (id_chat.isEmpty) {
+      _chatId = widget.pessoa.id + "||" + mAuth.currentUser!.uid;
+    }
 
-      if (mensagem.isNotEmpty) {
-        Message message = Message(content: mensagem,
-            date: DateTime.now().toString(),
-            sender: mAuth.currentUser!.uid);
+    if (mensagem.isNotEmpty) {
+      Message message = Message(
+          content: mensagem,
+          date: DateTime.now().toString(),
+          sender: mAuth.currentUser!.uid);
 
-        DocumentSnapshot snapshot = await firestore.collection("mensagens").doc(_chatId).get();
+      DocumentSnapshot snapshot =
+          await firestore.collection("mensagens").doc(_chatId).get();
 
+      dynamic data = snapshot.data();
 
-        dynamic data = snapshot.data();
-
-        if(data == null){
-          data = <String,dynamic>{};
-          data["users"] = [
-            widget.pessoa.id,
-            mAuth.currentUser!.uid,
-          ];
+      if (data == null) {
+        data = <String, dynamic>{};
+        data["users"] = [
+          widget.pessoa.id,
+          mAuth.currentUser!.uid,
+        ];
+        data["messages"] = [message.toMap()];
+        snapshot.reference.set(data);
+      } else {
+        if (!data.containsKey("messages")) {
           data["messages"] = [message.toMap()];
-          snapshot.reference.set(data);
-        }else{
-          if(!data.containsKey("messages")){
-            data["messages"] = [message.toMap()];
-          }else{
-            data["messages"].add(message.toMap());
-          }
-
-          data["users"]=[
-            widget.pessoa.id,
-            mAuth.currentUser!.uid
-          ];
-          snapshot.reference.update(data);
+        } else {
+          data["messages"].add(message.toMap());
         }
-        _mensagensController.clear();
 
+        data["users"] = [widget.pessoa.id, mAuth.currentUser!.uid];
+        snapshot.reference.update(data);
       }
+      _mensagensController.clear();
+    }
   }
 }
