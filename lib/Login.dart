@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:whatsapp/Cadastro.dart';
 
 import 'Home.dart';
@@ -25,11 +26,33 @@ class _LoginState extends State<Login> {
     super.initState();
     mAuth = FirebaseAuth.instance;
     firestore = FirebaseFirestore.instance;
+    getPackageInfo();
+  }
+  getPackageInfo() async{
+    PackageInfo packageInfo = await PackageInfo.fromPlatform();
 
-    if(mAuth.currentUser != null){
-      WidgetsBinding.instance?.addPostFrameCallback((_) {
-        Navigator.pushReplacementNamed(context, "/home");
-      });
+    DocumentSnapshot doc = await firestore.collection("app_config").doc("config").get();
+    String firebase_version = doc.get("current_version");
+
+    if(firebase_version == packageInfo.version){
+      if(mAuth.currentUser != null){
+        WidgetsBinding.instance?.addPostFrameCallback((_) {
+          Navigator.pushReplacementNamed(context, "/home");
+        });
+      }
+    }else{
+     showDialog(
+       barrierDismissible: false,
+         context: context,
+         builder: (context) {
+           return AlertDialog(
+             title: Text("Aviso"),
+             content: Container(
+               child: Text("Sua versão do aplicativo está desatualizada."),
+             ),
+           );
+         },
+     );
     }
   }
 
