@@ -46,9 +46,10 @@ class _MensagensState extends State<Mensagens> {
       for(DocumentSnapshot doc in querySnapshot.docs) {
         if (doc.get("users").contains(mAuth.currentUser!.uid) &&
             doc.get("users").contains(widget.pessoa.id)) {
+
           dynamic data = doc.data();
 
-
+          id_chat = doc.id;
           List<Message> messages_local = [];
 
           for(var value in data["messages"]){
