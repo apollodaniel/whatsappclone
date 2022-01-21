@@ -103,9 +103,8 @@ class _AbaConversasState extends State<AbaConversas> {
       itemCount: conversas.length,
       itemBuilder: (context, index) {
         try {
-          String date = conversas[index].messages.last.date;
-          DateTime date_parsed = DateTime.parse(date);
-          String formated_date = "";
+
+
 
           String message_content_raw = conversas[index].messages.last.content;
           String message_content = isImage(message_content_raw)
@@ -117,7 +116,9 @@ class _AbaConversasState extends State<AbaConversas> {
               mAuth.currentUser!.uid == conversas[index].messages.last.sender
                   ? "Você: $message_content"
                   : "$name: $message_content";
-
+          String date = conversas[index].messages.last.date;
+          DateTime date_parsed = DateTime.parse(date);
+          String formated_date = "";
           if (date_parsed.difference(DateTime.now()).inDays != 0 &&
               date_parsed.isBefore(DateTime.now())) {
             formated_date = DateFormat("dd/MM/yyyy").format(date_parsed);

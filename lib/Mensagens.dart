@@ -1,8 +1,14 @@
+import 'dart:io';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:intl/intl.dart';
+import 'package:path/path.dart';
+import 'package:uuid/uuid.dart';
 import 'package:whatsapp/Helper.dart';
 import 'package:whatsapp/model/Message.dart';
 
@@ -98,49 +104,80 @@ class _MensagensState extends State<Mensagens> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Expanded(
-                            child: ListView.builder(
-                              physics: BouncingScrollPhysics(),
-                              itemCount: messages.length,
-                              itemBuilder: (context, index) {
-                              Alignment alignment = Alignment.centerRight;
-                              Color cor = Colors.green;
-                              double larguraContainer =
-                                  MediaQuery.of(context).size.width * 80 / 100;
+                            child: Scrollbar(
+                              child: ListView.builder(
+                                physics: BouncingScrollPhysics(),
+                                itemCount: messages.length,
+                                itemBuilder: (context, index) {
+                                  Alignment alignment = Alignment.centerRight;
+                                  Color cor = Colors.green;
+                                  CrossAxisAlignment column_alignment = CrossAxisAlignment.end;
+                                  double larguraContainer =
+                                      MediaQuery.of(context).size.width * 80 / 100;
 
-                              if (messages[index].sender == widget.pessoa.id) {
-                                alignment = Alignment.centerLeft;
-                                cor = ThemeData.dark().primaryColor;
-                              }
+                                  String date = messages[index].date;
+                                  DateTime date_parsed = DateTime.parse(date);
+                                  String formated_date = "";
+                                  if (date_parsed.difference(DateTime.now()).inDays != 0 &&
+                                      date_parsed.isBefore(DateTime.now())) {
+                                    formated_date = DateFormat("dd/MM/yyyy").format(date_parsed);
+                                  } else {
+                                    formated_date = DateFormat("HH:mm").format(date_parsed);
+                                  }
 
-                              Widget message = Text(messages[index].content);
+                                  Widget message = Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Text(messages[index].content),
+                                      Text(formated_date)
+                                    ],
+                                  );
 
-                              String content = messages[index].content;
-                              if(Helper.isValidLink(content) && Helper.isImage(content.split("/").last)){
-                                message = Column(
-                                  children: [
-                                    Image.network(content),
-                                    Text(content.split("/").last)
-                                  ],
-                                );
-                              }
+                                  if (messages[index].sender == widget.pessoa.id) {
+                                    alignment = Alignment.centerLeft;
+                                    cor = ThemeData.dark().primaryColor;
+                                    column_alignment = CrossAxisAlignment.start;
+                                    message = Row(
+                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Text(formated_date),
+                                        Text(messages[index].content),
+                                      ],
+                                    );
+                                  }
 
-                              return Align(
-                                alignment: alignment,
-                                child: Padding(
-                                  padding: EdgeInsets.all(6),
-                                  child: Container(
-                                    width: larguraContainer,
-                                    decoration: BoxDecoration(
-                                        color: cor,
-                                        borderRadius:
+                                  String content = messages[index].content;
+
+                                  String description = basename(content).split("?").first;
+
+                                  if(Helper.isValidLink(content) && Helper.isImage(description)){
+                                    message = Column(
+                                      crossAxisAlignment: column_alignment,
+                                      children: [
+                                        Image.network(content),
+                                        Padding(padding: EdgeInsets.only(top: 4), child: Text(formated_date),)
+                                      ],
+                                    );
+                                  }
+
+                                  return Align(
+                                    alignment: alignment,
+                                    child: Padding(
+                                      padding: EdgeInsets.all(6),
+                                      child: Container(
+                                        width: larguraContainer,
+                                        decoration: BoxDecoration(
+                                            color: cor,
+                                            borderRadius:
                                             BorderRadius.all(Radius.circular(8))),
-                                    padding: EdgeInsets.all(16),
-                                    child: message,
-                                  ),
-                                ),
-                              );
-                          },
-                        )),
+                                        padding: EdgeInsets.all(16),
+                                        child: message,
+                                      ),
+                                    ),
+                                  );
+                                },
+                              ),
+                            )),
                         Padding(
                           padding: EdgeInsets.all(8),
                           child: Row(
@@ -152,11 +189,12 @@ class _MensagensState extends State<Mensagens> {
                                     controller: _mensagensController,
                                     autofocus: true,
                                     keyboardType: TextInputType.text,
-                                    style: TextStyle(fontSize: 20),
+                                    style: const TextStyle(fontSize: 20),
                                     decoration: InputDecoration(
                                         filled: true,
                                         fillColor:
                                             ThemeData.dark().primaryColor,
+                                        prefixIconColor: Theme.of(context).primaryColor,
                                         contentPadding:
                                             EdgeInsets.fromLTRB(32, 8, 32, 8),
                                         hintText: "Digite uma mensagem...",
@@ -165,7 +203,21 @@ class _MensagensState extends State<Mensagens> {
                                                 BorderRadius.circular(32)),
                                         prefixIcon: IconButton(
                                             icon: Icon(Icons.camera_alt),
-                                            onPressed: () {})),
+                                            onPressed: () async{
+                                              XFile? file_raw = await ImagePicker().pickImage(source: ImageSource.gallery);
+
+                                              if(file_raw != null){
+                                                File file = File(file_raw.path);
+                                                String filename =  "${Uuid().v1()}.${file.path.split(".").last}";
+                                                storage.ref(id_chat).child(filename).putFile(file).then((p0) async {
+
+                                                  String download_url = await p0.ref.getDownloadURL();
+                                                  _salvarMensagem(custom: download_url);
+
+                                                });
+                                              }
+
+                                            })),
                                   ),
                                 ),
                               ),
@@ -185,8 +237,13 @@ class _MensagensState extends State<Mensagens> {
             )));
   }
 
-  _salvarMensagem() async {
-    String mensagem = _mensagensController.text;
+  _salvarMensagem({String? custom}) async {
+    late String mensagem;
+    if(custom == null){
+       mensagem = _mensagensController.text;
+    }else{
+      mensagem = custom;
+    }
 
     String _chatId = id_chat;
 
